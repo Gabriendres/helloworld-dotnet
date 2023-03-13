@@ -1,15 +1,62 @@
-# C/C++ with GCC
-# Build your C/C++ project with GCC using make.
-# Add steps that publish test results, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/c-cpp/gcc
-
-trigger:
-- main
-
-pool:
-  vmImage: ubuntu-latest
-
 steps:
-- script: |
-    make
-  displayName: 'make'
+  - task: NuGetToolInstaller@1
+    displayName: 'Install NuGet'
+  - task: NuGetCommand@2
+    displayName: 'Restore NuGet packages'
+    inputs:
+      command: 'restore'
+      restoreSolution: '**/*.sln'
+      feedsToUse: 'select'
+      vstsFeed: '<your VSTS feed>'
+      includeNuGetOrg: true
+stages:
+- stage: build
+  jobs:
+  - job: Build
+    steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet build'
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+- stage: test
+  jobs:
+  - job: Test
+    steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet test'
+      inputs:
+        command: 'test'
+        projects: '**/*Test.csproj'
+- stage: publish
+  jobs:
+  - job: Publish
+    steps:
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet publish'
+      inputs:
+        command: 'publish'
+        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
+        projects: '**/*.csproj'  
+       
+  - job: Job_2
+    displayName: Impresion saludo
+    pool:
+      name: Default
+    steps:
+      - checkout: self
+        fetchDepth: 1
+      - task: CmdLine@2
+        displayName: Imprimir saludo
+        inputs:
+          script: >+
+          echo Hola Mundo
+          echo Hola Mundo
+          echo Hola Mundo
+          echo Hola Mundo
+          echo Hola Mundo
+          echo Hola Mundo
+          echo Hola Mundo
+          echo Hola Mundo
+          echo Hola Mundo
+          echo Hola Mundo
